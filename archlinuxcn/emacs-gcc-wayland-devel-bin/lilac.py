@@ -6,5 +6,5 @@ def pre_build():
     aur_pre_build()
     for line in edit_file('PKGBUILD'):
         if line.startswith('replaces='):
-            line = '#' + line
+            line = f'#{line}'
         print(line)

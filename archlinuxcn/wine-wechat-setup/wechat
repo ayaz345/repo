@@ -71,7 +71,7 @@ def install(env, prefix, file):
   regfile.unlink()
 
   fontname = get_preferred_chinese_font()
-  s = '"微软雅黑"="%s"' % fontname
+  s = f'"微软雅黑"="{fontname}"'
   s = re.sub('[^\x00-\xff]', to_reg_char, s)
   subprocess.check_call([
     'sed', '-i', '/\[Software\\\\Wine\\\\Fonts\\\\Replacements\]/a'+s,

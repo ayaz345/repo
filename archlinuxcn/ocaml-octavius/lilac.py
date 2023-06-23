@@ -6,6 +6,7 @@ def pre_build():
     aur_pre_build()
     for line in edit_file('PKGBUILD'):
         if line.startswith('makedepends='):
-            line = ('#' + line + '\n'
-                    "makedepends=('dune' 'ocaml-compiler-libs')")
+            line = (
+                f'#{line}' + '\n' "makedepends=('dune' 'ocaml-compiler-libs')"
+            )
         print(line)

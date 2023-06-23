@@ -6,13 +6,13 @@ import subprocess
 VAR_DIR = '/var/lib/graphite'
 
 def initialized():
-  files = os.listdir(VAR_DIR)
-  if not files:
+  if files := os.listdir(VAR_DIR):
+    return any(
+      os.path.getsize(os.path.join(VAR_DIR, f)) != 0
+      for f in files
+    )
+  else:
     return False
-  return any(
-    os.path.getsize(os.path.join(VAR_DIR, f)) != 0
-    for f in files
-  )
 
 def main():
   if not initialized():

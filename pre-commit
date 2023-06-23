@@ -68,8 +68,14 @@ def git_diff_tree():
     # git diff-tree
     # -r Recurse into sub-trees.
     # -z \0 line termination on output and do not quote filenames.
-    cmd = ['git', 'diff-tree', ORIGIN_BRANCH + '..' + GIT_BRANCH,
-           '-r', '-z', '--name-only']
+    cmd = [
+        'git',
+        'diff-tree',
+        f'{ORIGIN_BRANCH}..{GIT_BRANCH}',
+        '-r',
+        '-z',
+        '--name-only',
+    ]
     with Popen(cmd, stdout=PIPE) as p:
         changed_tree = readutf8(p.stdout)
         for line in changed_tree.split('\0')[:-1]:  # ignore last \0
@@ -78,10 +84,9 @@ def git_diff_tree():
                 if len(paths) > 2:
                     if git_isdir(os.path.join(SUBFOLDER, paths[1])):
                         CHANGED_PACKAGES.add(paths[1])
-            else:
-                if len(paths) > 1:
-                    if git_isdir(paths[0]):
-                        CHANGED_PACKAGES.add(paths[0])
+            elif len(paths) > 1:
+                if git_isdir(paths[0]):
+                    CHANGED_PACKAGES.add(paths[0])
 
 
 def git_ls_tree():
@@ -133,10 +138,7 @@ def git_isfile(path, name):
 
 
 def pkgpath(pkgname):
-    if git_isdir(SUBFOLDER):
-        return os.path.join(SUBFOLDER, pkgname)
-    else:
-        return pkgname
+    return os.path.join(SUBFOLDER, pkgname) if git_isdir(SUBFOLDER) else pkgname
 
 
 def lilac_py_has_field(pkgname, field, testcase):
@@ -154,7 +156,7 @@ def lilac_py_has_field(pkgname, field, testcase):
                         if target.id == field:
                             return True
         except:
-            testcase.fail(msg="{} can not parse".format(lilac_path))
+            testcase.fail(msg=f"{lilac_path} can not parse")
     return False
 
 def lilac_py_has_field_value(pkgname, field, value, testcase):
@@ -172,7 +174,7 @@ def lilac_py_has_field_value(pkgname, field, value, testcase):
                         if target.id == field:
                             return target.value == value
         except:
-            testcase.fail(msg="{} can not parse".format(lilac_path))
+            testcase.fail(msg=f"{lilac_path} can not parse")
     return False
 
 def lilac_py_has_update_on(pkgname, testcase):
@@ -191,7 +193,7 @@ def lilac_yaml_has_field(pkgname, field, testcase):
             if field in lilac_ast:
                 return True
         except:
-            testcase.fail(msg="{} can not parse".format(lilac_path))
+            testcase.fail(msg=f"{lilac_path} can not parse")
     return False
 
 def lilac_yaml_has_field_value(pkgname, field, value, testcase):
@@ -204,7 +206,7 @@ def lilac_yaml_has_field_value(pkgname, field, value, testcase):
             if field in lilac_ast:
                 return lilac_ast[field] == value
         except:
-            testcase.fail(msg="{} can not parse".format(lilac_path))
+            testcase.fail(msg=f"{lilac_path} can not parse")
     return False
 
 def lilac_yaml_has_update_on(pkgname, testcase):
@@ -215,8 +217,7 @@ def lilac_yaml_has_managed_false(pkgname, testcase):
 
 def extract_srcinfo(pkgbuild):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    with Popen(['bash', dir_path + '/parse-pkgbuild', '/dev/stdin'],
-               stdin=PIPE, stdout=PIPE) as p:
+    with Popen(['bash', f'{dir_path}/parse-pkgbuild', '/dev/stdin'], stdin=PIPE, stdout=PIPE) as p:
         outs,_ = p.communicate(input=pkgbuild.encode('UTF-8'))
         return outs.decode('UTF-8')
 
@@ -367,16 +368,20 @@ class RepoTreeTest(TestCase):
 
     def test_pkgbuild(self):
         def check_var_srcinfo(var, package, against, line):
-            if (var + ' = ') not in line:
+            if f'{var} = ' not in line:
                 return
             with self.subTest(package=package, line=line.strip()):
                 for pkg in against.keys():
-                    self.assertNotEqual(var + ' = ' + pkg,
+                    self.assertNotEqual(
+                        f'{var} = {pkg}',
                         depends_strip_version(line),
-                        msg=('PKGBUILD of package "\033[1;31m{0}\033[m" '
-                                'contains "\033[1;31m{1} = {2}\033[m" in '
-                                '"{3}" repo').format(package, var, pkg,
-                                                     ','.join(against[pkg])))
+                        msg=(
+                            'PKGBUILD of package "\033[1;31m{0}\033[m" '
+                            'contains "\033[1;31m{1} = {2}\033[m" in '
+                            '"{3}" repo'
+                        ).format(package, var, pkg, ','.join(against[pkg])),
+                    )
+
         for package in iter_packages():
             if IGNORE_SRCINFO:
                 continue
@@ -386,7 +391,7 @@ class RepoTreeTest(TestCase):
             pkgbuild_path = os.path.join(pkgpath(package), 'PKGBUILD')
             with git_open(pkgbuild_path) as pkgbuild_file:
                 pkgbuild = pkgbuild_file.read()
-                if not (('replaces' in pkgbuild) or ('groups' in pkgbuild)):
+                if 'replaces' not in pkgbuild and 'groups' not in pkgbuild:
                     # only parse pkgbuild as srcinfo when necessory
                     continue
                 srcinfo = extract_srcinfo(pkgbuild)
@@ -407,14 +412,7 @@ class RepoTreeTest(TestCase):
                 with git_open(lilac_yaml_path) as lilac_yaml_file:
                     lilac_yaml = yaml.load(lilac_yaml_file.read(), Loader=yaml.SafeLoader)
                     for dep in lilac_yaml.get('repo_depends', []):
-                        if isinstance(dep, dict):
-                            # When `dep` is a dict, this repo_depends entry
-                            # has the form `pkgbase: pkgname`. Here I assume
-                            # split packages are successfully packaged. so only
-                            # the pkgbase needs to be checked.
-                            dep_package = list(dep.keys())[0]
-                        else:
-                            dep_package = dep
+                        dep_package = list(dep.keys())[0] if isinstance(dep, dict) else dep
                         self.assertTrue(
                             dep_package in all_pkgs,
                             msg=('package "\033[1;31m{0}\033[m" depends on '

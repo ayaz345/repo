@@ -7,8 +7,7 @@ def pre_build():
   kernel = _G.newvers[1]
   update_pkgver_and_pkgrel(_G.newver)
   for line in edit_file('PKGBUILD'):
-    m = depends_lily_re.match(line)
-    if m:
+    if m := depends_lily_re.match(line):
       line = depends_lily_re.sub(
         r'\1"linux-lily=%s"' % kernel, line)
     print(line)

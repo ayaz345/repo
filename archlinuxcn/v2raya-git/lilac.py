@@ -6,9 +6,9 @@ def pre_build():
     aur_pre_build()
     for line in edit_file('PKGBUILD'):
         if line.strip().startswith('yarn config set'):
-            line = '#' + line
+            line = f'#{line}'
         elif line.strip().startswith('export GO111MODULE'):
-            line = '#' + line
+            line = f'#{line}'
         elif line.strip().startswith('export GOPROXY'):
-            line = '#' + line
+            line = f'#{line}'
         print(line)

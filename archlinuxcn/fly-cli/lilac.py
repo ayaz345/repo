@@ -10,7 +10,7 @@ def pre_build():
   ver = _get_new_version()
   for l in edit_file('PKGBUILD'):
     if l.startswith('pkgver='):
-      l = 'pkgver=' + ver
+      l = f'pkgver={ver}'
     print(l)
   run_cmd(["updpkgsums"])
 

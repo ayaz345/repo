@@ -7,9 +7,9 @@ def pre_build():
     aur_pre_build()
     add_makedepends(['git'])
     for line in edit_file('PKGBUILD'):
-        if line.strip().startswith('depot-tools-auth') or line.strip().startswith('roll-dep-svn'):
-            pass # delete this line
-        else:
+        if not line.strip().startswith(
+            'depot-tools-auth'
+        ) and not line.strip().startswith('roll-dep-svn'):
             print(line)
 
 

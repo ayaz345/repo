@@ -8,15 +8,15 @@ def pre_build():
 
   for line in edit_file('PKGBUILD'):
     if 'java-runtime' in line:
-        print(line.replace('java-runtime','java-environment'))
+      print(line.replace('java-runtime','java-environment'))
     elif 'gradle jar' in line:
         print('\tmkdir gradle-cache')
         print('\texport GRADLE_USER_HOME="${srcdir}/${pkgname}/gradle-cache"')
         print(line)
     elif 'changelog=.CHANGELOG' in line:
-        print('#'+line)
+      print(f'#{line}')
     else:
-        print(line)
+      print(line)
 
 def post_build():
   git_add_files('PKGBUILD')

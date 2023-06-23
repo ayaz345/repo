@@ -12,7 +12,7 @@ def pre_build():
     if line.startswith('pkgname='):
       line = 'pkgname=pacman-lily'
     elif line.startswith('pkgdesc='):
-      line = line[:-1] + ' (no disabling-server-on-error)"'
+      line = f'{line[:-1]} (no disabling-server-on-error)"'
     elif line.startswith('provides=('):
       line = line.replace(')', ' "pacman=$pkgver")\n') + "conflicts=('pacman')"
     elif line.startswith('groups=('):

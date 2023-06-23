@@ -17,53 +17,53 @@ def pre_build():
   # Removed qt5-webengine from the qt5-pkgs conflict list.
   # As of 2021 April, qt5-base in Arch is using kde fork, so the version number for various
   # qt5-* packages would differ.
-  for line in open('qt5-pkgs').readlines():
+  for line in open('qt5-pkgs'):
     p = line.strip()
-    conflict_string = conflict_string + '"' + p + '>$_basever.99" '
+    conflict_string = f'{conflict_string}"{p}>$_basever.99" '
 
   prepare = False
   checks = ''
   for line in edit_file('PKGBUILD'):
     if line.startswith('pkgbase='):
       line = 'pkgbase=qt5-base-24hms' + '\n' + '_origpkgname=qt5-base'
-      checks = checks + '0'
+      checks = f'{checks}0'
     elif line.startswith('pkgrel='):
-      line = line + '.13'
+      line = f'{line}.13'
     elif line.startswith('pkgname='):
       line = 'pkgname=(qt5-base-24hms)'
-      checks = checks + '1'
+      checks = f'{checks}1'
     elif line.startswith('pkgdesc='):
       line = "pkgdesc='A cross-platform application and UI framework. This package uses 24-hour notation HH:mm:ss in all locales.'"
-      checks = checks + 'b'
+      checks = f'{checks}b'
     elif line.startswith('makedepends=('):
       line = line.replace('(', "('python2' ")
-      checks = checks + '2'
+      checks = f'{checks}2'
     elif line.startswith('conflicts=('):
-      line = line.replace('(', '("qt5-base" ' + conflict_string)
-      checks = checks + '3'
+      line = line.replace('(', f'("qt5-base" {conflict_string}')
+      checks = f'{checks}3'
     elif line.startswith('groups=('):
       line = '''
 provides=("qt5-base=$pkgver")
 ''' # remove official groups
-      checks = checks + '4'
+      checks = f'{checks}4'
     elif line.startswith('_pkgfqn='):
       line = line.replace('${pkgbase/5-/}', '${_origpkgname/5-/}')
-      checks = checks + '5'
+      checks = f'{checks}5'
     elif line.startswith('source=('):
       line = line.replace('=(', '''=(
       oldherl-24hms.patch
       'https://build.archlinuxcn.org/~oldherl/files/cldr/36/core.zip'
       ''')
-      checks = checks + '6'
+      checks = f'{checks}6'
     elif line.startswith('sha256sums=('):
       line = line.replace('=(', '''=(
       '9c62800980e97b1614e4fc85ecad3b032606d0e620295e791fc3f34629bb0a44'
       '07279e56c1f4266d140b907ef3ec379dce0a99542303a9628562ac5fe460ba43'
       ''')
-      checks = checks + '7'
+      checks = f'{checks}7'
     elif line.startswith('prepare('):
       prepare = True
-      checks = checks + '8'
+      checks = f'{checks}8'
     elif prepare and line.startswith('}'):
       line = '''
   patch -p1 -i ../oldherl-24hms.patch
@@ -73,7 +73,7 @@ provides=("qt5-base=$pkgver")
   ./qlocalexml2cpp.py ./24h.xml ../..
 ''' + line
       prepare = False
-      checks = checks + '9'
+      checks = f'{checks}9'
     elif line.startswith('package_qt5-base('):
       # single package now
       # provide symlink to be used by qt5-* packages
@@ -81,18 +81,18 @@ provides=("qt5-base=$pkgver")
 install -dm755 "$pkgdir"/usr/share/licenses/
 ln -s /usr/share/licenses/${pkgname} "$pkgdir"/usr/share/licenses/qt5-base
 '''
-      checks = checks + 'a'
+      checks = f'{checks}a'
     elif line.startswith('package_'):
       # other split packages. do not build them.
-      line = 'no' + line
+      line = f'no{line}'
       logger.info('removed: %s', line)
     elif line.startswith('depends=('):
       # let it conflict with incompatable icu versions, @q234rty
       line = line.replace('=(', '=(libicudata.so ')
-      checks = checks + 'c'
+      checks = f'{checks}c'
     print(line)
   if len(checks) != 13:
-    raise ValueError('PKGBUILD editing not completed. checks=' + checks)
+    raise ValueError(f'PKGBUILD editing not completed. checks={checks}')
 
 def post_build():
   git_add_files(g.files)

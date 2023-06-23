@@ -17,9 +17,9 @@ def pre_build():
     # edit PKGBUILD
     count=count+1
     if count in {14,18,22,24}:
-        print('#'+line)
+      print(f'#{line}')
     else:
-        print(line)
+      print(line)
 
 #post_build = aur_post_build
 

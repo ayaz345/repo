@@ -37,8 +37,16 @@ def pre_build():
     run_cmd(["git", "fetch", "upstream"], use_pty=True)
     run_cmd(["git", "merge", "--no-edit", "upstream/master"])
 
-  cmd = ["git", "daemon", "--export-all", "--reuseaddr", "--base-path=.", "--listen=127.0.0.1", "--",
-         "./" + repo_dir]
+  cmd = [
+      "git",
+      "daemon",
+      "--export-all",
+      "--reuseaddr",
+      "--base-path=.",
+      "--listen=127.0.0.1",
+      "--",
+      f"./{repo_dir}",
+  ]
   p = subprocess.Popen(cmd)
   if p.poll():
     raise subprocess.CalledProcessError(p.returncode, cmd, '(not captured)')

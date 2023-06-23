@@ -16,20 +16,15 @@ def custom_preproc(vers):
   # that is not covered by `from_pattern`.
   if "-" in vers:
     vers = vers.replace('-', '.')
-  if len(vers.split('.')) == 3:
-    return vers + '.REL'
-  else:
-    return vers
+  return f'{vers}.REL' if len(vers.split('.')) == 3 else vers
 
 def remove_prefix(s, prefix):
-  if s.startswith(prefix):
-    return s[len(prefix):]
-  else:
-    return s
+  return s[len(prefix):] if s.startswith(prefix) else s
 
 # Check github tags
 # Replace by regex before sorting. This is not currently supported by nvchecker
-req = urllib.request.Request('https://api.github.com/repos/{}/tags'.format(github_repo))
+req = urllib.request.Request(
+    f'https://api.github.com/repos/{github_repo}/tags')
 body = None
 with urllib.request.urlopen(req) as res:
   body = json.load(res)

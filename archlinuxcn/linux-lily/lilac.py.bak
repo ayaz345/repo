@@ -15,15 +15,15 @@ uksm_file = 'https://github.com/dolohow/uksm/raw/master/uksm-4.13.patch'
 
 def prepare_source(version):
   config = os.path.join(os.getcwd(), 'config.x86_64')
-  mypatch = os.path.join(os.getcwd(), 'config.diff.' + config_version)
+  mypatch = os.path.join(os.getcwd(), f'config.diff.{config_version}')
 
   with at_dir(os.path.expanduser('~/linux-git')):
     git_reset_hard()
     run_cmd(["git", "fetch", "--all"])
-    run_cmd(["git", "checkout", "-b", 'v%s-lily' % version, "v" + version])
-    run_cmd(["git", "merge", "--no-edit", 'cjktty/%s-utf8' % cjktty_version])
+    run_cmd(["git", "checkout", "-b", f'v{version}-lily', f"v{version}"])
+    run_cmd(["git", "merge", "--no-edit", f'cjktty/{cjktty_version}-utf8'])
 
-    run_cmd(["sh", "-c", 'curl -sS %s | patch -p1' % uksm_file])
+    run_cmd(["sh", "-c", f'curl -sS {uksm_file} | patch -p1'])
     run_cmd(["git", "add", "."])
     run_cmd(["git", "commit", "-m", 'apply uksm patch'])
 
@@ -50,7 +50,7 @@ def edit_PKGBUILD():
     elif line.startswith('pkgbase='):
       line = line.replace('linux', 'linux-lily')
     elif line.startswith('pkgver='):
-      line = 'pkgver=' + _G.newver
+      line = f'pkgver={_G.newver}'
     elif line.startswith('makedepends='):
       line = "makedepends=('kmod' 'inetutils' 'bc' 'parallel')"
     elif line.startswith('options='):

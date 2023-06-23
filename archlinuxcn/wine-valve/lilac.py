@@ -4,9 +4,9 @@ def pre_build():
   newver = _G.newver.removeprefix('experimental-wine-')
   newver = newver.removeprefix('proton-wine-')
   for line in edit_file('PKGBUILD'):
-      if line.startswith('_pkgver'):
-          line = "_pkgver='" + newver + "'"
-      print(line)
+    if line.startswith('_pkgver'):
+      line = f"_pkgver='{newver}'"
+    print(line)
   newver = newver.replace("-",".")
   update_pkgver_and_pkgrel(newver)
 

@@ -62,7 +62,7 @@ class Package(object):
             if len(versions) > 1:
                 version = self.choose_version(versions)
             else:
-                logging.info('Using version %s' % versions[0])
+                logging.info(f'Using version {versions[0]}')
                 version = versions[0]
         self.version = version
         self.pyversion = pyversion
@@ -75,15 +75,13 @@ class Package(object):
         if not len(data):
             raise VersionNotFound('PyPi did not return any information for version {0}'.format(self.version))
         elif not len(raw_urls):
-            if 'download_url' in data:
-                download_url = data['download_url']
-                if SOURCEFILE_TYPE_RE.match(data['download_url']) is None:
-                    raise LackOfInformation("Couldn't find any suitable source")
-                else:
-                    urls = {'url': download_url}
-                    logging.warning('Got download link but no md5, you may have to search it by youself or generate it')
-            else:
+            if 'download_url' not in data:
                 raise LackOfInformation('PyPi did not return the necessary information to create the PKGBUILD')
+            download_url = data['download_url']
+            if SOURCEFILE_TYPE_RE.match(download_url) is None:
+                raise LackOfInformation("Couldn't find any suitable source")
+            urls = {'url': download_url}
+            logging.warning('Got download link but no md5, you may have to search it by youself or generate it')
         else:
             urls = {}
             for url in raw_urls:
@@ -91,12 +89,11 @@ class Package(object):
                     urls = url
             if not urls:
                 raise pip2archException
-                ('Selected package version had no suitable sources')
         logging.info('Parsed release_urls data')
 
 
         self.distributepackage = 'python2-distribute' if\
-            self.pyversion != 'python' else 'python3'
+                self.pyversion != 'python' else 'python3'
         logging.info("Set distribute package as {0}".format(self.distributepackage))
 
         if outname is not None:
@@ -149,8 +146,7 @@ class Package(object):
         selection = raw_input('Enter the number of the PyPi package you would like to process\n')
 
         try:
-            selection = int(selection.strip())
-            selection -= 1
+            selection = int(selection.strip()) - 1
             chosen = results[selection]
         except (TypeError, IndexError):
             print ('Not a valid selection. Must be integer in range 1 - {length}'.format(length=len(results)))
@@ -172,10 +168,9 @@ class Package(object):
         ver = raw_input('Which version would you like to use? ')
         if ver in versions:
             return ver
-        else:
-            print ('That was NOT one of the choices...')
-            print ('Try again')
-            return self.choose_version(versions)
+        print ('That was NOT one of the choices...')
+        print ('Try again')
+        return self.choose_version(versions)
 
     def add_depends(self, depends):
         self.depends += depends
@@ -184,8 +179,10 @@ class Package(object):
         self.makedepends += makedepends
 
     def render(self):
-        depends = "'" + "' '".join(d for d in self.depends) + "'" if self.depends else ''
-        makedepends = "'" + "' '".join(d for d in self.makedepends) + "'" if self.makedepends else ''
+        depends = "'" + "' '".join(self.depends) + "'" if self.depends else ''
+        makedepends = (
+            "'" + "' '".join(self.makedepends) + "'" if self.makedepends else ''
+        )
         return BLANK_PKGBUILD.format(pkg=self,
                                      date=datetime.date.today(),
                                      depends=depends,

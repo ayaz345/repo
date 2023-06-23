@@ -11,7 +11,7 @@ def pre_build():
     if line.startswith('pkgname='):
       line = 'pkgname=xorg-xwayland-lily'
     if line.startswith('pkgdesc='):
-      line = line[:-1] + ', with !733 HiDPI patch"'
+      line = f'{line[:-1]}, with !733 HiDPI patch"'
     elif line.startswith('provides'):
       line = "provides=('xorg-server-xwayland' 'xorg-xwayland' 'xorg-xwayland-hidpi-xprop')"
     elif line.startswith('conflicts'):

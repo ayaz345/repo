@@ -19,27 +19,27 @@ def pre_build():
 
         if line.startswith('JIT='):
             line = 'JIT="YES"'
-            checks = checks + '3'
+            checks = f'{checks}3'
         if line.startswith('AOT='):
             line = 'AOT="YES"'
-            checks = checks + '4'
+            checks = f'{checks}4'
 
         if line.startswith('PGTK='):
             line = 'PGTK="YES"'
-            checks = checks + '5'
+            checks = f'{checks}5'
 
         if line.startswith('XWIDGETS='):
             line = 'XWIDGETS="YES"'
-            checks = checks + '6'
+            checks = f'{checks}6'
 
         # enable tree-sitter, request from #3094
         if line.startswith('SITTER='):
             line = 'SITTER="YES"'
-            checks = checks + '8'
+            checks = f'{checks}8'
 
         if line.startswith('install='):
             line = 'install=emacs-git.install'
-            checks = checks + '7'
+            checks = f'{checks}7'
 
         #if line.startswith('source='):
         #    line = 'source=("emacs-git::git+https://github.com/emacs-mirror/emacs.git")'
@@ -49,4 +49,4 @@ def pre_build():
 
     # make sure PKGBUILD is modified
     if len(checks) != 6:
-        raise ValueError('PKGBUILD editing not completed. checks=' + checks)
+        raise ValueError(f'PKGBUILD editing not completed. checks={checks}')
